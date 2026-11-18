@@ -1,2 +1,125 @@
-# kultdash
-Inserir descrição mais tarde
+# KultDash – Central de Operações Agrícolas
+
+Sistema web em PHP + MySQL + JavaScript (tela única com modais), gráficos com Google Charts e relatórios PDF com HTML2PDF.
+
+## Estrutura
+
+```
+kultdash/
+├── index.php, dashboard.php, logout.php
+├── conexao.php          → configuração do MySQL (host, usuário, senha, porta, limite de arquivo)
+├── composer.json        → spipu/html2pdf 5.2.8
+├── css/style.css        → cores e tamanhos em variáveis (:root)
+├── js/script.js         → modais, CRUD via fetch, resumo, linhas de conexão
+├── js/graficos.js       → Google Charts
+├── img/                 → fazenda.svg (fundo da propriedade) e logo.svg
+├── includes/            → auth.php, api.php, funcoes.php
+├── modulos/             → propriedades, areas, animais, maquinas, prontuarios, arquivos (api.php = endpoints JSON) e opcoes.php
+├── graficos/dados_graficos.php
+├── relatorios/          → pdf.php + conteudo_*.php (4 relatórios) + _cabecalho.php
+└── banco/
+    ├── db_kultive.sql            → cria o banco e as tabelas
+    ├── dados_iniciais.sql        → tipos por categoria + usuário admin (corrige banco antigo e pode rodar de novo)
+    ├── dados_exemplo.sql         → propriedades, animais, máquinas, áreas e ocorrências de teste (opcional)
+    └── limpar_dados_exemplo.sql  → remove os dados de exemplo
+```
+
+Requisitos: PHP 7.4 ou superior com as extensões `mysqli`, `mbstring`, `fileinfo` e `gd`; MySQL 5.7+/8.x ou MariaDB; Composer.
+
+---
+
+## A) Com XAMPP e phpMyAdmin
+
+1. Instale o XAMPP e copie a pasta `kultdash` para `C:\xampp\htdocs\`.
+2. Em `C:\xampp\php\php.ini`, remova o `;` de `;extension=gd` (as demais extensões já vêm ativas) e reinicie o Apache.
+3. Inicie Apache e MySQL no XAMPP Control Panel.
+4. No phpMyAdmin (http://localhost/phpmyadmin), aba *Importar*, importe nesta ordem: `banco/db_kultive.sql`, `banco/dados_iniciais.sql` e, se quiser dados de teste, `banco/dados_exemplo.sql`.
+5. No terminal, dentro da pasta do projeto: `composer require spipu/html2pdf:5.2.8` (cria a pasta `vendor/`).
+6. Acesse http://localhost/kultdash/
+
+O `conexao.php` já vem com o padrão do XAMPP (`127.0.0.1`, `root`, senha vazia, porta 3306).
+
+---
+
+## B) Com MySQL Workbench e NetBeans
+
+Nesta configuração o banco é um MySQL Server separado (o do Workbench) e o NetBeans edita e executa o PHP. É preciso ter um servidor PHP: o mais simples é instalar o XAMPP e usar **somente o Apache** (não inicie o MySQL do XAMPP, para não disputar a porta 3306 com o MySQL Server).
+
+### 1. Banco de dados (Workbench)
+
+1. Abra a conexão com o seu servidor (normalmente `127.0.0.1`, porta `3306`, usuário `root`).
+2. Menu *File → Run SQL Script…* e escolha, nesta ordem, executando cada um **inteiro**:
+   1. `banco/db_kultive.sql`
+   2. `banco/dados_iniciais.sql`
+   3. `banco/dados_exemplo.sql` (opcional)
+3. Os scripts já desligam o modo seguro do Workbench (`SET SQL_SAFE_UPDATES`) quando precisam. Atualize o painel *Schemas* para ver o `db_kultive`.
+4. Para apagar os dados de teste depois: execute `banco/limpar_dados_exemplo.sql`.
+
+Dados de acesso criados: usuário `admin`, senha `password`.
+
+### 2. Configurar a conexão
+
+Edite `conexao.php` com os dados da **sua** conexão do Workbench:
+
+```php
+const DB_HOST = '127.0.0.1';
+const DB_USUARIO = 'root';
+const DB_SENHA = 'a_senha_do_seu_mysql';
+const DB_NOME = 'db_kultive';
+const DB_PORTA = 3306;
+```
+
+Use `127.0.0.1` em vez de `localhost` (evita problemas de resolução no Windows). Se a porta do seu servidor não for 3306, ajuste `DB_PORTA`.
+
+### 3. PHP e Composer
+
+1. Em `php.ini` (no XAMPP: `C:\xampp\php\php.ini`), confirme que estão ativas (sem `;`): `extension=mysqli`, `extension=mbstring`, `extension=fileinfo` e `extension=gd`. Reinicie o Apache depois.
+2. Instale o Composer (https://getcomposer.org) e, na pasta do projeto, rode: `composer require spipu/html2pdf:5.2.8`. Se o Composer reclamar de `ext-gd`, ative a extensão (passo 1) ou use `--ignore-platform-req=ext-gd`.
+
+### 4. NetBeans
+
+Os menus podem variar um pouco conforme a versão do NetBeans (versões mais novas precisam do suporte a PHP instalado como plugin).
+
+1. Coloque a pasta do projeto em `C:\xampp\htdocs\kultdash` (assim o Apache já a serve).
+2. *File → New Project → PHP → PHP Application with Existing Sources*, e selecione essa pasta.
+3. Na etapa *Run Configuration*, deixe *Run As* em **Local Web Site (running on local web server)** e confira se o *Project URL* é `http://localhost/kultdash/`.
+4. Abra o `dashboard.php` e execute o projeto (botão *Run*, tecla F6). O navegador abre o sistema.
+
+Se o projeto ficar em outra pasta (fora do `htdocs`), marque *Copy files from Sources Folder to another location* e aponte para `C:\xampp\htdocs\kultdash`, ou use a alternativa sem Apache: abra um terminal na pasta do projeto, rode `php -S localhost:8000` e acesse http://localhost:8000/dashboard.php (exige o PHP instalado e no PATH).
+
+### 5. Limites de envio de arquivos
+
+O sistema aceita arquivos de até 10 MB (`TAMANHO_MAX_ARQUIVO` em `conexao.php` e em `js/script.js`, que devem ser iguais). Para isso funcionar:
+
+- **MySQL**: `max_allowed_packet` de pelo menos 16 MB. No Workbench: *Administration → Options File → Networking*, ou, de forma temporária, `SET GLOBAL max_allowed_packet = 33554432;` (reconecte depois). Para deixar permanente, edite o `my.ini` (no Windows costuma ficar em `C:\ProgramData\MySQL\MySQL Server 8.0\`) e reinicie o serviço.
+- **PHP** (`php.ini`): `upload_max_filesize=20M` e `post_max_size=25M`, depois reinicie o Apache.
+
+Se algum limite estiver baixo, o próprio sistema informa qual deve ser aumentado.
+
+---
+
+## Login (pendente)
+
+A tela de login ainda não existe. Em `includes/auth.php`, com `LOGIN_ATIVO = false`, o sistema entra automaticamente como `admin` (ou o primeiro usuário da tabela). As permissões por propriedade (`usuario_propriedade`) são validadas no servidor em todos os endpoints.
+
+Para ativar o login depois: criar `login.php` (usando `password_verify()` e gravando `$_SESSION['usuario_id']`) e mudar `LOGIN_ATIVO` para `true`.
+
+## Pontos de atenção
+
+- **Tipos por categoria**: `tipagem.categoria` (`animal`, `maquina`, `area`, `arquivo`, `ocorrencia`, `usuario`) separa as listas. Ocorrências aceitam qualquer tipo (exceto de usuário). Para novos tipos: `INSERT INTO tipagem (nome, definicao, categoria) VALUES (...)`.
+- **Unidade**: tamanhos em hectares (`ha`), definido em `UNIDADE_TAMANHO` (`js/script.js`).
+- **Exclusões**: registros com vínculos (ex.: animal citado em uma ocorrência) não são excluídos, e o sistema avisa. Excluir uma ocorrência remove também seus arquivos.
+- **Imagem e logo**: troque `img/fazenda.svg` (variável `--imagem-fazenda` em `css/style.css`) e `img/logo.svg`.
+- **Gráficos** precisam de internet (carregam o Google Charts).
+- **CSS/JS não atualizou?** Pressione Ctrl+F5.
+
+## Solução de problemas
+
+| Sintoma | Causa provável |
+|---|---|
+| "Sem conexão com o banco de dados" no rodapé | MySQL desligado, ou host/usuário/senha/porta errados em `conexao.php` |
+| Erro ao importar `dados_iniciais.sql` no Workbench (código 1175) | Modo seguro ativo: rode o script inteiro, ele já desliga o modo seguro |
+| "Class Spipu\Html2Pdf not found" / "HTML2PDF não instalado" | Falta rodar o `composer require` (pasta `vendor/` ausente) |
+| Lista de tipos vazia | Importe `banco/dados_iniciais.sql` |
+| Envio de arquivo falha com aviso de limite | Ajuste `max_allowed_packet` (MySQL) e `upload_max_filesize` / `post_max_size` (PHP) |
+| Gráficos em branco | Sem internet, ou propriedade sem dados |
