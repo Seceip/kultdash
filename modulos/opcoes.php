@@ -5,12 +5,7 @@ $lista = (string)entrada('lista');
 
 if ($lista === 'tipos') {
     $categoria = (string)entrada('categoria');
-    if ($categoria === '') {
-        $d = consultar($conn, "SELECT tipo_id AS id, nome AS label, definicao AS title FROM tipagem WHERE categoria <> 'usuario' ORDER BY nome");
-    } else {
-        $d = consultar($conn, 'SELECT tipo_id AS id, nome AS label, definicao AS title FROM tipagem WHERE categoria = ? ORDER BY nome', 's', [$categoria]);
-    }
-    sucesso(['dados' => $d]);
+    sucesso(['dados' => consultarTipos($conn, $categoria === '' ? null : $categoria)]);
 }
 
 $prop = exigirPropriedade();

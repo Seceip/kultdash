@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/categorias.php';
+
 function responder($dados, $codigo = 200) {
     http_response_code($codigo);
     header('Content-Type: application/json; charset=utf-8');
@@ -122,14 +124,25 @@ function excluirRegistro($conn, $tabela, $pk, $id, $propId) {
     obterRegistro($conn, $tabela, $pk, $id, $propId);
     executar($conn, "DELETE FROM $tabela WHERE $pk = ? AND prop_id = ?", 'ii', [$id, $propId]);
 }
+function consultarTipos($conn, $categoria = null) {
+    $base = 'SELECT tipo_id AS id, nome AS label, definicao AS title FROM tipagem';
+    if ($categoria === null) {
+        $nomes = TIPOS_POR_CATEGORIA['usuario'] ?? [];
+        if (!$nomes) return consultar($conn, "$base ORDER BY nome");
+        $filtro = 'NOT IN';
+    } else {
+        $nomes = TIPOS_POR_CATEGORIA[$categoria] ?? [];
+        if (!$nomes) return [];
+        $filtro = 'IN';
+    }
+    $marcas = implode(',', array_fill(0, count($nomes), '?'));
+    return consultar($conn, "$base WHERE nome $filtro ($marcas) ORDER BY nome", str_repeat('s', count($nomes)), $nomes);
+}
+
 function exigirTipo($conn, $tipoId, $categoria = null) {
     if ($tipoId === null) return;
-    if ($categoria === null) {
-        $r = consultar($conn, 'SELECT 1 FROM tipagem WHERE tipo_id = ?', 'i', [$tipoId]);
-    } else {
-        $r = consultar($conn, 'SELECT 1 FROM tipagem WHERE tipo_id = ? AND categoria = ?', 'is', [$tipoId, $categoria]);
-    }
-    if (!$r) erro('Tipo inválido para este cadastro.');
+    $ids = array_map('intval', array_column(consultarTipos($conn, $categoria), 'id'));
+    if (!in_array($tipoId, $ids, true)) erro('Tipo inválido para este cadastro.');
 }
 
 function h($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }

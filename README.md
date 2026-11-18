@@ -13,13 +13,13 @@ kultdash/
 ├── js/script.js         → modais, CRUD via fetch, resumo, linhas de conexão
 ├── js/graficos.js       → Google Charts
 ├── img/                 → fazenda.svg (fundo da propriedade) e logo.svg
-├── includes/            → auth.php, api.php, funcoes.php
+├── includes/            → auth.php, api.php, funcoes.php e categorias.php (tipos de cada categoria)
 ├── modulos/             → propriedades, areas, animais, maquinas, prontuarios, arquivos (api.php = endpoints JSON) e opcoes.php
 ├── graficos/dados_graficos.php
 ├── relatorios/          → pdf.php + conteudo_*.php (4 relatórios) + _cabecalho.php
 └── banco/
     ├── db_kultive.sql            → cria o banco e as tabelas
-    ├── dados_iniciais.sql        → tipos por categoria + usuário admin (corrige banco antigo e pode rodar de novo)
+    ├── dados_iniciais.sql        → tipos + usuário admin + MEDIUMBLOB (pode rodar de novo sem duplicar)
     ├── dados_exemplo.sql         → propriedades, animais, máquinas, áreas e ocorrências de teste (opcional)
     └── limpar_dados_exemplo.sql  → remove os dados de exemplo
 ```
@@ -106,7 +106,7 @@ Para ativar o login depois: criar `login.php` (usando `password_verify()` e grav
 
 ## Pontos de atenção
 
-- **Tipos por categoria**: `tipagem.categoria` (`animal`, `maquina`, `area`, `arquivo`, `ocorrencia`, `usuario`) separa as listas. Ocorrências aceitam qualquer tipo (exceto de usuário). Para novos tipos: `INSERT INTO tipagem (nome, definicao, categoria) VALUES (...)`.
+- **Tipos por categoria**: o agrupamento fica em `includes/categorias.php` (lista de nomes de tipo por categoria: `animal`, `maquina`, `area`, `arquivo`, `usuario`). Para um tipo novo aparecer na lista certa, crie-o na tabela `tipagem` e acrescente o nome em `categorias.php`. Ocorrências aceitam qualquer tipo (exceto os de usuário). Se o banco ainda tiver a coluna `categoria` de versões anteriores, ela é ignorada; pode removê-la com `ALTER TABLE tipagem DROP COLUMN categoria;`.
 - **Unidade**: tamanhos em hectares (`ha`), definido em `UNIDADE_TAMANHO` (`js/script.js`).
 - **Exclusões**: registros com vínculos (ex.: animal citado em uma ocorrência) não são excluídos, e o sistema avisa. Excluir uma ocorrência remove também seus arquivos.
 - **Imagem e logo**: troque `img/fazenda.svg` (variável `--imagem-fazenda` em `css/style.css`) e `img/logo.svg`.
@@ -120,6 +120,6 @@ Para ativar o login depois: criar `login.php` (usando `password_verify()` e grav
 | "Sem conexão com o banco de dados" no rodapé | MySQL desligado, ou host/usuário/senha/porta errados em `conexao.php` |
 | Erro ao importar `dados_iniciais.sql` no Workbench (código 1175) | Modo seguro ativo: rode o script inteiro, ele já desliga o modo seguro |
 | "Class Spipu\Html2Pdf not found" / "HTML2PDF não instalado" | Falta rodar o `composer require` (pasta `vendor/` ausente) |
-| Lista de tipos vazia | Importe `banco/dados_iniciais.sql` |
+| Lista de tipos vazia | Importe `banco/dados_iniciais.sql` e confira se o nome do tipo está em `includes/categorias.php` |
 | Envio de arquivo falha com aviso de limite | Ajuste `max_allowed_packet` (MySQL) e `upload_max_filesize` / `post_max_size` (PHP) |
 | Gráficos em branco | Sem internet, ou propriedade sem dados |

@@ -4,8 +4,7 @@ CREATE TABLE IF NOT EXISTS tipagem
 (
     tipo_id INT PRIMARY KEY AUTO_INCREMENT,
     nome VARCHAR(100) NOT NULL,
-    definicao VARCHAR(200) NOT NULL,
-    categoria VARCHAR(20) NOT NULL DEFAULT 'geral'
+    definicao VARCHAR(200) NOT NULL
 );
 CREATE TABLE IF NOT EXISTS propriedade 
 (
