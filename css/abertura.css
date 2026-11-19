@@ -1,0 +1,54 @@
+html.abertura { overflow: hidden; }
+html.abertura .app { opacity: 0; }
+.app { transition: opacity .9s ease; }
+
+#abertura { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; overflow: hidden;
+            background: linear-gradient(180deg, #020d08 0%, #04200f 58%, #0a3612 100%); }
+#abertura.fim { animation: ab-saida .9s ease forwards; pointer-events: none; }
+@keyframes ab-saida { to { opacity: 0; transform: scale(1.06); } }
+
+.ab-sol { position: absolute; left: 50%; bottom: -18vh; width: 120vw; height: 70vh; transform: translateX(-50%);
+          background: radial-gradient(ellipse at 50% 100%, rgba(255, 196, 40, .34), rgba(255, 120, 0, .14) 40%, transparent 70%);
+          animation: ab-sol 6s ease-in-out infinite alternate; }
+@keyframes ab-sol { to { opacity: .75; transform: translateX(-50%) scale(1.06); } }
+
+.ab-campo { position: absolute; left: -30%; right: -30%; bottom: 0; height: 46vh; perspective: 34vh; overflow: hidden;
+            -webkit-mask-image: linear-gradient(to top, #000 30%, transparent); mask-image: linear-gradient(to top, #000 30%, transparent); }
+.ab-campo::before { content: ''; position: absolute; inset: -40% 0 0 0; transform-origin: 50% 100%; transform: rotateX(58deg);
+                    background: repeating-linear-gradient(90deg, rgba(150, 235, 60, .22) 0 .25vw, transparent .25vw 6vw),
+                                repeating-linear-gradient(0deg, rgba(255, 200, 60, .10) 0 .2vw, transparent .2vw 7vh);
+                    animation: ab-avanco 2.4s linear infinite; }
+@keyframes ab-avanco { to { background-position: 0 0, 0 7vh; } }
+
+.ab-particulas { position: absolute; inset: 0; pointer-events: none; }
+.ab-particula { position: absolute; left: var(--x); bottom: -2vh; width: var(--t); height: var(--t); border-radius: 50%; background: var(--c); box-shadow: 0 0 8px var(--c);
+                opacity: 0; animation: ab-subir var(--d) linear infinite; animation-delay: var(--a); }
+@keyframes ab-subir { 0% { transform: translate(0, 0); opacity: 0; } 15% { opacity: .7; } 100% { transform: translate(var(--dx), -95vh); opacity: 0; } }
+
+.ab-centro { position: relative; z-index: 2; width: 100%; padding: 0 4vw; display: flex; flex-direction: column; align-items: center; text-align: center;
+             gap: clamp(.4rem, 1.6vh, 1.2rem); perspective: 900px; }
+.ab-logo { height: min(30vh, 17rem); width: auto; max-width: 70vw; opacity: 0;
+           filter: drop-shadow(0 0 22px rgba(160, 240, 40, .5)) drop-shadow(0 0 40px rgba(255, 150, 0, .25));
+           animation: ab-logo 2.4s cubic-bezier(.3, .7, .3, 1) .2s forwards; }
+@keyframes ab-logo {
+    0% { opacity: 0; transform: scale(.55) rotateY(0); }
+    28% { opacity: 1; transform: scale(1) rotateY(0); }
+    72% { opacity: 1; transform: scale(1) rotateY(360deg); }
+    100% { opacity: 1; transform: scale(1) rotateY(360deg); }
+}
+
+.ab-titulo { font-size: clamp(3.8rem, 13vw, 12.5rem); font-weight: 800; line-height: 1; letter-spacing: .02em; padding: 0 .1em .08em;
+             background: linear-gradient(90deg, #18f000 0%, #9be41a 32%, #ffd000 62%, #ff7a00 85%, #ff2a00 100%); background-size: 200% 100%;
+             -webkit-background-clip: text; background-clip: text; color: transparent; opacity: 0;
+             filter: blur(0) drop-shadow(0 0 28px rgba(190, 240, 40, .3));
+             animation: ab-titulo 1.3s cubic-bezier(.2, .8, .2, 1) 1.3s forwards, ab-brilho 3.2s ease-in-out 2.6s infinite alternate; }
+@keyframes ab-titulo {
+    from { opacity: 0; letter-spacing: .32em; filter: blur(14px) drop-shadow(0 0 28px rgba(190, 240, 40, 0)); }
+    to { opacity: 1; letter-spacing: .02em; filter: blur(0) drop-shadow(0 0 28px rgba(190, 240, 40, .3)); }
+}
+@keyframes ab-brilho { to { background-position: 100% 0; } }
+
+.ab-sub { font-size: clamp(.9rem, 1.6vw, 1.5rem); letter-spacing: .24em; text-transform: uppercase; color: #cfe8b0; opacity: 0; animation: ab-sub .9s ease 2.2s forwards; }
+@keyframes ab-sub { from { opacity: 0; transform: translateY(10px); } to { opacity: .85; transform: none; } }
+
+.ab-dica { position: absolute; left: 1.4rem; bottom: 1rem; z-index: 3; font: 12px Consolas, 'Courier New', monospace; color: #4f7a45; }

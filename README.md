@@ -6,13 +6,15 @@ Sistema web em PHP + MySQL + JavaScript (tela única com modais), gráficos com 
 
 ```
 kultdash/
-├── index.php, dashboard.php, logout.php
+├── index.php, login.php, dashboard.php, logout.php
 ├── conexao.php          → configuração do MySQL (host, usuário, senha, porta, limite de arquivo)
 ├── composer.json        → spipu/html2pdf 5.2.8
-├── css/style.css        → cores e tamanhos em variáveis (:root)
+├── css/style.css        → dashboard (cores e tamanhos em variáveis :root)
+├── css/login.css        → tela de login
 ├── js/script.js         → modais, CRUD via fetch, resumo, linhas de conexão
+├── js/login.js          → abertura animada do login
 ├── js/graficos.js       → Google Charts
-├── img/                 → fazenda.svg (fundo da propriedade) e logo.svg
+├── img/                 → fazenda.svg, logo.svg (dashboard) e logo_vision.png (login)
 ├── includes/            → auth.php, api.php, funcoes.php e categorias.php (tipos de cada categoria)
 ├── modulos/             → propriedades, areas, animais, maquinas, prontuarios, arquivos (api.php = endpoints JSON) e opcoes.php
 ├── graficos/dados_graficos.php
@@ -98,11 +100,17 @@ Se algum limite estiver baixo, o próprio sistema informa qual deve ser aumentad
 
 ---
 
-## Login (pendente)
+## Login
 
-A tela de login ainda não existe. Em `includes/auth.php`, com `LOGIN_ATIVO = false`, o sistema entra automaticamente como `admin` (ou o primeiro usuário da tabela). As permissões por propriedade (`usuario_propriedade`) são validadas no servidor em todos os endpoints.
+A tela `login.php` (marca VisionDash, com abertura animada) autentica pelo **e-mail** e pela senha da tabela `usuario`, usando `password_verify()`. Usuário de teste criado por `dados_iniciais.sql`: e-mail `admin@kultdash.local`, senha `password`. Para pular a animação de abertura, pressione qualquer tecla.
 
-Para ativar o login depois: criar `login.php` (usando `password_verify()` e gravando `$_SESSION['usuario_id']`) e mudar `LOGIN_ATIVO` para `true`.
+- Sem sessão, o dashboard, os relatórios e os endpoints redirecionam para o login (ou respondem "Sessão expirada").
+- O botão "Sair" do dashboard encerra a sessão.
+- Para desenvolver sem login, mude `LOGIN_ATIVO` para `false` em `includes/auth.php` (entra automático como `admin`).
+- As senhas precisam estar gravadas como hash (60 caracteres, começando com `$2y$`); senha em texto puro não é aceita. Para gerar: `php -r "echo password_hash('senha', PASSWORD_DEFAULT);"`. Usuário novo: grave esse hash na coluna `senha` e vincule o usuário a uma propriedade em `usuario_propriedade`.
+- Depois do login, o dashboard abre com uma animação (logo girando e nome KultDash em tela cheia), só uma vez por acesso: `css/abertura.css`, `js/abertura.js` e `img/logo_kultdash.png`. Qualquer tecla pula.
+- Se o login recusar credenciais corretas, abra `http://localhost/kultdash/diagnostico_login.php` (só funciona em localhost): ele mostra o que há na tabela `usuario` e se a senha confere. **Apague esse arquivo depois de usar.**
+- Logo da tela de login: `img/logo_vision.png`. Cores e animações: `css/login.css`; sequência de inicialização (textos e tempos): `js/login.js`.
 
 ## Pontos de atenção
 

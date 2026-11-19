@@ -5,7 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-const LOGIN_ATIVO = false;
+const LOGIN_ATIVO = true;
 const USUARIO_TESTE = 'admin';
 
 function usuarioLogado($conn) {
@@ -23,9 +23,11 @@ function usuarioLogado($conn) {
 }
 
 function urlRaiz() {
-    $doc = str_replace('\\', '/', (string)realpath($_SERVER['DOCUMENT_ROOT']));
     $raiz = str_replace('\\', '/', (string)realpath(__DIR__ . '/..'));
-    return substr($raiz, strlen($doc)) . '/';
+    $script = str_replace('\\', '/', (string)realpath($_SERVER['SCRIPT_FILENAME']));
+    $relativo = ltrim(substr($script, strlen($raiz)), '/');
+    $web = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
+    return substr($web, 0, strlen($web) - strlen($relativo));
 }
 
 function exigirLoginPagina($conn) {

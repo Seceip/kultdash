@@ -30,6 +30,10 @@ async function api(url, dados = null) {
     } catch (e) {
         throw new Error('Falha de conexão com o servidor.');
     }
+    if (resp.status === 401) {
+        window.location.href = 'login.php';
+        throw new Error('Sessão expirada.');
+    }
     let json;
     try {
         json = await resp.json();

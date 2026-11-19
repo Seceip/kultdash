@@ -2,6 +2,8 @@
 require_once __DIR__ . '/includes/auth.php';
 $usuario = exigirLoginPagina($conn);
 $csrf = tokenCsrf();
+$abertura = !empty($_SESSION['abertura']);
+unset($_SESSION['abertura']);
 
 $icones = [
     'areas' => '<rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/>',
@@ -45,8 +47,25 @@ function cartao($c) {
     <title>KultDash - Central de Operações Agrícolas</title>
     <link rel="icon" href="img/logo.svg" type="image/svg+xml">
     <link rel="stylesheet" href="css/style.css?v=<?= filemtime(__DIR__ . '/css/style.css') ?>">
+<?php if ($abertura) { ?>
+    <link rel="stylesheet" href="css/abertura.css?v=<?= filemtime(__DIR__ . '/css/abertura.css') ?>">
+    <script>document.documentElement.classList.add('abertura');</script>
+<?php } ?>
 </head>
 <body>
+<?php if ($abertura) { ?>
+<div id="abertura" aria-hidden="true">
+    <div class="ab-sol"></div>
+    <div class="ab-campo"></div>
+    <div class="ab-particulas"></div>
+    <div class="ab-centro">
+        <img class="ab-logo" src="img/logo_kultdash.png" alt="">
+        <div class="ab-titulo">KultDash</div>
+        <p class="ab-sub">Do plantio à colheita, tudo em um só painel</p>
+    </div>
+    <p class="ab-dica">pressione qualquer tecla para pular</p>
+</div>
+<?php } ?>
 <div class="app">
 
     <header class="topo caixa">
@@ -146,5 +165,8 @@ function cartao($c) {
 <script src="https://www.gstatic.com/charts/loader.js"></script>
 <script src="js/script.js?v=<?= filemtime(__DIR__ . '/js/script.js') ?>"></script>
 <script src="js/graficos.js?v=<?= filemtime(__DIR__ . '/js/graficos.js') ?>"></script>
+<?php if ($abertura) { ?>
+<script src="js/abertura.js?v=<?= filemtime(__DIR__ . '/js/abertura.js') ?>"></script>
+<?php } ?>
 </body>
 </html>

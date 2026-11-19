@@ -4,7 +4,7 @@ mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 const DB_HOST = '127.0.0.1';
 const DB_USUARIO = 'root';
-const DB_SENHA = '';
+const DB_SENHA = 'root';
 const DB_NOME = 'db_kultive';
 const DB_PORTA = 3306;
 
