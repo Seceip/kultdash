@@ -26,7 +26,7 @@
     let somTocou = false;
 
     const LINHAS = [
-        ['VISIONDASH SYSTEM v1.0.0', null],
+        ['VISIONDASH SYSTEM v9.3.5', null],
         ['> iniciando núcleo do sistema ............ ', 'OK'],
         ['> carregando módulos de interface ........ ', 'OK'],
         ['> montando painéis e gráficos ............ ', 'OK'],
