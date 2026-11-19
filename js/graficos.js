@@ -1,6 +1,6 @@
-const COR_TEXTO = '#cfe3cf';
-const COR_GRADE = '#2a3a2a';
-const CORES = ['#7ed957', '#3fb0c9', '#e3a72f', '#c96f3f', '#9b7ed9', '#d95f8e', '#5fd9b0', '#d9d95f'];
+const COR_TEXTO = '#cfe3a0';
+const COR_GRADE = '#2a3d14';
+const CORES = ['#a9e03a', '#ffd000', '#4fd13a', '#ff8a00', '#e2f26b', '#ff4a2a', '#7be0a0', '#c9b84a'];
 
 const GRAFICOS = [
     { id: 'g-animais', titulo: 'Quantidade de animais por tipo', chave: 'animais', forma: 'pizza', cab: ['Tipo', 'Animais'] },
@@ -67,7 +67,7 @@ function desenharGraficos() {
         let grafico;
         if (g.forma === 'pizza') {
             opcoes.chartArea = { left: 10, top: 10, width: '90%', height: '88%' };
-            opcoes.pieSliceBorderColor = '#0e140f';
+            opcoes.pieSliceBorderColor = '#071007';
             opcoes.pieSliceTextStyle = { color: '#06100a' };
             grafico = new google.visualization.PieChart(el);
         } else if (g.forma === 'colunas') {

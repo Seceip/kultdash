@@ -13,9 +13,13 @@ kultdash/
 ├── css/login.css        → tela de login
 ├── js/script.js         → modais, CRUD via fetch, resumo, linhas de conexão
 ├── js/login.js          → abertura animada do login
+├── js/linhas.js         → linhas de circuito entre os cartões e a propriedade
+├── js/sons.js           → sons ao passar o mouse (nomes e volume no início do arquivo)
+├── js/olho.js           → olho do logo (olha de um lado para o outro e pisca raramente) e teclado do quadro da propriedade
 ├── js/graficos.js       → Google Charts
-├── img/                 → fazenda.svg, logo.svg (dashboard) e logo_vision.png (login)
-├── includes/            → auth.php, api.php, funcoes.php e categorias.php (tipos de cada categoria)
+├── img/                 → logo_kultdash.png (abertura e ícone), olho_contorno.png + olho_iris.png (logo do cabeçalho em 2 camadas) e logo_vision.png (login)
+├── sons/                → coloque aqui os MP3 dos sons (veja sons/LEIAME.txt)
+├── includes/            → auth.php, api.php, funcoes.php, categorias.php (tipos de cada categoria) e cenas.php (ilustrações animadas)
 ├── modulos/             → propriedades, areas, animais, maquinas, prontuarios, arquivos (api.php = endpoints JSON) e opcoes.php
 ├── graficos/dados_graficos.php
 ├── relatorios/          → pdf.php + conteudo_*.php (4 relatórios) + _cabecalho.php
@@ -117,7 +121,8 @@ A tela `login.php` (marca VisionDash, com abertura animada) autentica pelo **e-m
 - **Tipos por categoria**: o agrupamento fica em `includes/categorias.php` (lista de nomes de tipo por categoria: `animal`, `maquina`, `area`, `arquivo`, `usuario`). Para um tipo novo aparecer na lista certa, crie-o na tabela `tipagem` e acrescente o nome em `categorias.php`. Ocorrências aceitam qualquer tipo (exceto os de usuário). Se o banco ainda tiver a coluna `categoria` de versões anteriores, ela é ignorada; pode removê-la com `ALTER TABLE tipagem DROP COLUMN categoria;`.
 - **Unidade**: tamanhos em hectares (`ha`), definido em `UNIDADE_TAMANHO` (`js/script.js`).
 - **Exclusões**: registros com vínculos (ex.: animal citado em uma ocorrência) não são excluídos, e o sistema avisa. Excluir uma ocorrência remove também seus arquivos.
-- **Imagem e logo**: troque `img/fazenda.svg` (variável `--imagem-fazenda` em `css/style.css`) e `img/logo.svg`.
+- **Aparência do dashboard**: visual minimalista em verde, com um efeito de TV/transmissão antiga muito discreto (linhas de varredura, granulação e uma faixa lenta) no início de `css/style.css` (cores nas variáveis `:root`; para desligar o efeito, apague os blocos `body::before`, `body::after` e `html::after`). As ilustrações animadas (estilo gravura) dos cartões e da propriedade ficam em `includes/cenas.php` (as cenas `centro`, `areas` e `animais` foram redesenhadas com celeiro, silo, campos em perspectiva, plantas e vacas; nuvens, plantas, cata-vento, cauda e orelha da vaca se movem sozinhos). O quadro central da propriedade é o botão que abre o modal de propriedades (indicado por "GERENCIAR ›"). O logo do cabeçalho usa `img/olho_contorno.png` (fixo) e `img/olho_iris.png` (se move, controlado por `js/olho.js`); a abertura continua usando `img/logo_kultdash.png`.
+- **Sons**: coloque os MP3 em `sons/` (nomes em `sons/LEIAME.txt`). Tocam ao passar o mouse nos cartões e no quadro da propriedade; o botão de alto-falante no cabeçalho liga e desliga.
 - **Gráficos** precisam de internet (carregam o Google Charts).
 - **CSS/JS não atualizou?** Pressione Ctrl+F5.
 

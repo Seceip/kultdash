@@ -1,6 +1,8 @@
 (function () {
     const raiz = document.documentElement;
     const abertura = document.getElementById('abertura');
+    const pausa = (ms) => new Promise((ok) => setTimeout(ok, pulado ? 0 : ms));
+    const somBoot = new Audio('sons/kultdash.mp3');
     if (!abertura) {
         raiz.classList.remove('abertura');
         return;
@@ -11,6 +13,8 @@
 
     for (let i = 0; i < 28; i++) {
         const p = document.createElement('span');
+        somTocou = true;
+        somBoot.play().catch(() => {});
         p.className = 'ab-particula';
         p.style.cssText = `--x:${Math.random() * 100}%;--t:${2 + Math.random() * 4}px;--c:${cores[i % cores.length]};` +
             `--d:${6 + Math.random() * 6}s;--a:${-Math.random() * 8}s;--dx:${(Math.random() - 0.5) * 12}vw`;
