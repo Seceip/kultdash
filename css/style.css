@@ -120,6 +120,12 @@ html::after { content: ''; position: fixed; left: 0; right: 0; top: -22vh; heigh
 .col-esq .modulo:nth-child(odd) { margin-left: 1rem; }
 .col-dir .modulo:nth-child(odd) { margin-right: 1rem; }
 
+.piquete { border: 1px solid rgba(120, 200, 80, .35); margin: 1rem 0; padding: .6rem .8rem; transition: background .15s; }
+.piquete.alvo { background: rgba(120, 200, 80, .12); outline: 2px dashed #7fd13b; }
+.piquete .barra { display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem; }
+tr[draggable="true"] { cursor: grab; }
+.acoes select.mover { font: inherit; font-size: .75rem; background: transparent; color: inherit; border: 1px solid currentColor; padding: .2rem .3rem; }
+
 .modulo { display: flex; flex-direction: column; align-items: center; gap: .3rem; padding: .6rem .8rem .65rem; overflow: hidden; border: 1px solid var(--borda);
           background: var(--cartao); cursor: pointer; text-align: center; color: var(--lima); transition: border-color .2s, background .2s; }
 .modulo:focus-visible { border-color: var(--lima); background: #0a150b; outline: none; }

@@ -100,6 +100,7 @@ const MODULOS = {
     },
     animais: {
         titulo: 'Animais', singular: 'animal', url: 'modulos/animais/api.php',
+        piquetes : true,
         colunas: [['id', 'Identificação', (v) => `Animal #${v}`], ['tipo', 'Tipo'], ['data_compra', 'Compra', fmtData], ['data_nasci', 'Nascimento', fmtData], ['situacao_atual', 'Situação']],
         campos: [
             { n: 'tipo_id', r: 'Tipo', t: 'select', lista: 'tipos&categoria=animal', obrig: true },
@@ -174,6 +175,7 @@ async function mostrarLista(msgSucesso = '') {
         return;
     }
     mensagem(msgSucesso ? 'ok' : '', msgSucesso);
+    if (m.piquetes) return desenharAnimais(m);
 
     const cab = m.colunas.map((c) => `<th>${esc(c[1])}</th>`).join('') + '<th></th>';
     const linhas = estado.lista.map((l, i) => {
@@ -205,6 +207,114 @@ async function mostrarLista(msgSucesso = '') {
     $('#modalCorpo').querySelectorAll('[data-extra]').forEach((b) => (b.onclick = async () => {
         try { await m.extras[b.dataset.extra].fn(estado.lista[b.dataset.i]); } catch (e) { mensagem('erro', e.message); }
     }));
+}
+
+const chavePiquetes = () => `piquetes:${estado.propriedade.id}`;
+
+function lerPiquetes() {
+    try {
+        const d = JSON.parse(localStorage.getItem(chavePiquetes()));
+        if (d && Array.isArray(d.lista)) return d;
+    } catch (e) { /* ignora */ }
+    return { proximo: 1, lista: [] };
+}
+
+function salvarPiquetes(d) {
+    try { localStorage.setItem(chavePiquetes(), JSON.stringify(d)); } catch (e) { /* ignora */ }
+}
+
+function novoPiquete() {
+    const d = lerPiquetes();
+    d.lista.push({ id: `Piquete_${String(d.proximo).padStart(4, '0')}`, animais: [] });
+    d.proximo++;
+    salvarPiquetes(d);
+    desenharAnimais(MODULOS.animais);
+}
+
+function removerPiquete(id) {
+    if (!confirm(`Remover ${id}? Os animais dele voltam para "Sem piquete" (continuam na fazenda).`)) return;
+    const d = lerPiquetes();
+    d.lista = d.lista.filter((p) => p.id !== id);
+    salvarPiquetes(d);
+    desenharAnimais(MODULOS.animais);
+}
+
+function moverAnimal(animalId, destino) {
+    const d = lerPiquetes();
+    d.lista.forEach((p) => { p.animais = p.animais.filter((a) => String(a) !== String(animalId)); });
+    if (destino !== 'livre') {
+        const p = d.lista.find((x) => x.id === destino);
+        if (p) p.animais.push(String(animalId));
+    }
+    salvarPiquetes(d);
+    desenharAnimais(MODULOS.animais);
+}
+
+function desenharAnimais(m) {
+    const d = lerPiquetes();
+    const existentes = new Set(estado.lista.map((l) => String(l.id)));
+    // ignora animais que foram excluídos do banco
+    d.lista.forEach((p) => { p.animais = p.animais.filter((a) => existentes.has(String(a))); });
+    const alocados = new Set(d.lista.flatMap((p) => p.animais.map(String)));
+    const livres = estado.lista.filter((l) => !alocados.has(String(l.id)));
+
+    const cab = m.colunas.map((c) => `<th>${esc(c[1])}</th>`).join('') + '<th></th>';
+
+    const linha = (l, atual) => {
+        const cels = m.colunas.map((c) => `<td>${esc(c[2] ? c[2](l[c[0]]) : (l[c[0]] ?? '—'))}</td>`).join('');
+        const opcoes = [`<option value="livre" ${atual === 'livre' ? 'selected' : ''}>Sem piquete</option>`]
+            .concat(d.lista.map((p) => `<option value="${p.id}" ${atual === p.id ? 'selected' : ''}>${p.id}</option>`)).join('');
+        return `<tr draggable="true" data-animal="${l.id}">${cels}<td><div class="acoes">
+            <select class="mover" data-mover="${l.id}" title="Mover para...">${opcoes}</select>
+            <button type="button" class="btn pequeno" data-ver="${l.id}">Ver</button>
+            <button type="button" class="btn pequeno" data-editar="${l.id}">Editar</button>
+            <button type="button" class="btn pequeno perigo" data-excluir="${l.id}">Excluir</button>
+        </div></td></tr>`;
+    };
+
+    const bloco = (titulo, id, animais, removivel) => `
+        <section class="piquete" data-piquete="${id}">
+            <div class="barra">
+                <span><strong>${esc(titulo)}</strong> · ${animais.length} animal(is)</span>
+                ${removivel ? `<button type="button" class="btn pequeno perigo" data-remover-piquete="${id}">Remover piquete</button>` : ''}
+            </div>
+            ${animais.length
+                ? `<table class="tabela"><thead><tr>${cab}</tr></thead><tbody>${animais.map((l) => linha(l, id)).join('')}</tbody></table>`
+                : '<p class="vazio">Arraste um animal para cá.</p>'}
+        </section>`;
+
+    $('#modalCorpo').innerHTML = `
+        <div class="barra"><span>${estado.lista.length} registro(s)</span>
+            <span>
+                <button type="button" class="btn" id="btnNovoPiquete">Novo piquete</button>
+                <button type="button" class="btn principal" id="btnNovo">Adicionar ${esc(m.singular)}</button>
+            </span></div>
+        ${bloco('Sem piquete (na fazenda)', 'livre', livres, false)}
+        ${d.lista.map((p) => bloco(p.id, p.id, estado.lista.filter((l) => p.animais.map(String).includes(String(l.id))), true)).join('')}`;
+
+    const corpo = $('#modalCorpo');
+    $('#btnNovo').onclick = () => mostrarForm(null);
+    $('#btnNovoPiquete').onclick = novoPiquete;
+    corpo.querySelectorAll('[data-ver]').forEach((b) => (b.onclick = () => mostrarForm(b.dataset.ver, true)));
+    corpo.querySelectorAll('[data-editar]').forEach((b) => (b.onclick = () => mostrarForm(b.dataset.editar)));
+    corpo.querySelectorAll('[data-excluir]').forEach((b) => (b.onclick = () => excluir(b.dataset.excluir)));
+    corpo.querySelectorAll('[data-remover-piquete]').forEach((b) => (b.onclick = () => removerPiquete(b.dataset.removerPiquete)));
+    corpo.querySelectorAll('[data-mover]').forEach((s) => (s.onchange = () => moverAnimal(s.dataset.mover, s.value)));
+
+    // arrastar e soltar
+    corpo.querySelectorAll('tr[data-animal]').forEach((tr) => {
+        tr.ondragstart = (e) => { e.dataTransfer.setData('text/plain', tr.dataset.animal); e.dataTransfer.effectAllowed = 'move'; };
+    });
+    corpo.querySelectorAll('.piquete').forEach((sec) => {
+        sec.ondragover = (e) => { e.preventDefault(); sec.classList.add('alvo'); };
+        sec.ondragleave = (e) => { if (!sec.contains(e.relatedTarget)) sec.classList.remove('alvo'); };
+        sec.ondrop = (e) => {
+            e.preventDefault();
+            sec.classList.remove('alvo');
+            const animalId = e.dataTransfer.getData('text/plain');
+            if (animalId) moverAnimal(animalId, sec.dataset.piquete);
+        };
+    });
 }
 
 function campoHtml(c, valor, opcoes, somenteLeitura) {
